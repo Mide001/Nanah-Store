@@ -1,10 +1,21 @@
-import { useCart } from "../app/providers";
+import { useCart } from "../providers";
 import Image from "next/image";
 import { X, Trash2 } from "lucide-react";
 
+// CartItem type for proper typing
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  images: string[];
+  color: string;
+  size: string;
+  customMessage?: string;
+}
+
 export function CartModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { cartItems, removeFromCart, clearCart } = useCart();
-  const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+  const total = cartItems.reduce((sum: number, item: CartItem) => sum + item.price, 0);
 
   if (!open) return null;
 
