@@ -7,8 +7,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ShoppingCart, Check } from 'lucide-react';
-import { useCart } from '../../providers';
-import { CartModal } from '../../../components/cart-modal';
+import { useCart } from '../../../providers';
+import { PaymentModal } from '@/components/payment-modal';
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
@@ -28,20 +28,40 @@ const colorMap: { [key: string]: string } = {
   'Gray': '#6b7280',
 };
 
+// CartItem type for proper typing
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  color: string;
+  size: string;
+  customMessage?: string;
+}
+
+interface PaymentResult {
+  success: boolean;
+  error?: string;
+  email?: string;
+  address?: string;
+  name?: string;
+}
+
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { id } = React.use(params);
   const product = products.find((p) => p.id === id);
   if (!product) return notFound();
 
   const [mainImg, setMainImg] = useState(product.images[0]);
-  const { cartItems, addToCart } = useCart();
-  const isInCart = cartItems.some((item) => item.id === product.id);
-  const [cartOpen, setCartOpen] = useState(false);
+  const { cartItems, addToCart, clearCart } = useCart();
+  const isInCart = cartItems.some((item: CartItem) => item.id === product.id);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [customMessage, setCustomMessage] = useState<string>("");
 
   const canAddToCart = !isInCart && selectedColor && selectedSize;
+  const total = cartItems.reduce((sum: number, item: CartItem) => sum + item.price, 0);
 
   const handleAddToCart = () => {
     if (canAddToCart) {
@@ -50,6 +70,14 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         size: selectedSize,
         customMessage: customMessage.trim() || undefined
       });
+    }
+  };
+
+  const handlePaymentSuccess = (result: PaymentResult) => {
+    setPaymentResult(result);
+    setShowPaymentModal(false);
+    if (result.success) {
+      clearCart();
     }
   };
 
@@ -64,11 +92,18 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
           <div className="flex items-center space-x-3">
             <h1 className="text-xl font-bold">Nanah Store</h1>
+            <a
+              href="/admin"
+              className="text-sm text-gray-500 hover:text-pink-500 transition-colors"
+            >
+              Admin
+            </a>
           </div>
           <button
             className="relative flex items-center gap-2 text-pink-500 hover:text-pink-600 focus:outline-none"
-            onClick={() => setCartOpen(true)}
-            aria-label="Open cart"
+            onClick={() => setShowPaymentModal(true)}
+            aria-label="Checkout"
+            disabled={cartItems.length === 0}
           >
             <ShoppingCart className="h-7 w-7" />
             {cartItems.length > 0 && (
@@ -181,7 +216,15 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           </div>
         </div>
       </div>
-      <CartModal open={cartOpen} onClose={() => setCartOpen(false)} />
+      
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={handlePaymentSuccess}
+        cartItems={cartItems}
+        total={total}
+      />
     </div>
   );
 } 
