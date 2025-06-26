@@ -4,14 +4,32 @@ import { useState } from "react";
 import { ProductCard } from "../components/product-card";
 import { products as allProducts } from "../data/products";
 import { ShoppingCart } from "lucide-react";
-import { useCart } from "./providers";
-import { CartModal } from "../components/cart-modal";
+import { useCart } from "../providers";
+import { PaymentModal } from "@/components/payment-modal";
+
+interface PaymentResult {
+  success: boolean;
+  error?: string;
+  email?: string;
+  address?: string;
+  name?: string;
+}
+
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  color: string;
+  size: string;
+  customMessage?: string;
+}
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [cartOpen, setCartOpen] = useState(false);
-  const { cartItems } = useCart();
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
+  const { cartItems, clearCart } = useCart();
 
   const categories = [
     "All",
@@ -27,6 +45,16 @@ export default function Home() {
     return matchesSearch && matchesCategory;
   });
 
+  const total = cartItems.reduce((sum: number, item: CartItem) => sum + item.price, 0);
+
+  const handlePaymentSuccess = (result: PaymentResult) => {
+    setPaymentResult(result);
+    setShowPaymentModal(false);
+    if (result.success) {
+      clearCart();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Small Header with Context */}
@@ -39,11 +67,18 @@ export default function Home() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
           <div className="flex items-center space-x-3">
             <h1 className="text-xl font-bold">Nanah Store</h1>
+            <a
+              href="/admin"
+              className="text-sm text-gray-500 hover:text-pink-500 transition-colors"
+            >
+              Admin
+            </a>
           </div>
           <button
             className="relative flex items-center gap-2 text-pink-500 hover:text-pink-600 focus:outline-none"
-            onClick={() => setCartOpen(true)}
-            aria-label="Open cart"
+            onClick={() => setShowPaymentModal(true)}
+            aria-label="Checkout"
+            disabled={cartItems.length === 0}
           >
             <ShoppingCart className="h-7 w-7" />
             {cartItems.length > 0 && (
@@ -90,7 +125,15 @@ export default function Home() {
           ))}
         </div>
       </div>
-      <CartModal open={cartOpen} onClose={() => setCartOpen(false)} />
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={handlePaymentSuccess}
+        cartItems={cartItems}
+        total={total}
+      />
     </div>
   );
 }
