@@ -27,7 +27,7 @@ export function ProductCard({ product, hideImage }: ProductCardProps) {
           </div>
         )}
         <div className="p-3 sm:p-4 flex flex-col flex-1">
-          <h3 className="font-medium text-primary-foreground mb-1 sm:mb-2 line-clamp-1 text-base sm:text-lg">
+          <h3 className="font-medium text-primary-foreground mb-1 sm:mb-2 text-base sm:text-lg truncate overflow-hidden">
             {product.name}
           </h3>
           <p className="text-secondary/70 text-sm mb-2 sm:mb-3 line-clamp-2">
