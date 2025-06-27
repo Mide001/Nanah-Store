@@ -22,6 +22,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  color: string;
+  size: string;
+  customMessage?: string;
+}
+
 interface PaymentResult {
   success: boolean;
   error?: string;
@@ -30,11 +39,33 @@ interface PaymentResult {
   name?: string;
 }
 
+interface UserData {
+  email?: string;
+  physicalAddress?: {
+    address1?: string;
+    address2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    countryCode?: string;
+    name?: {
+      familyName?: string;
+      firstName?: string;
+    };
+  };
+}
+
+interface DataResponse {
+  capabilities?: {
+    dataCallback?: UserData;
+  };
+}
+
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (result: PaymentResult) => void;
-  cartItems: any[];
+  cartItems: CartItem[];
   total: number;
 }
 
@@ -92,7 +123,7 @@ export function PaymentModal({
       setResult(null);
 
       // First, execute the USDC transfer
-      const paymentResponse: any = await provider?.request({
+      const paymentResponse = await provider?.request({
         method: "wallet_sendCalls",
         params: [
           {
@@ -113,7 +144,7 @@ export function PaymentModal({
             ],
           },
         ],
-      });
+      }) as { hash?: string } | undefined;
 
       console.log("Payment response:", paymentResponse);
       console.log("Transaction hash:", paymentResponse?.hash);
@@ -129,9 +160,9 @@ export function PaymentModal({
       if (dataToRequest.email) requests.push({ type: "email", optional: false });
       if (dataToRequest.address) requests.push({ type: "physicalAddress", optional: false });
 
-      let userData = null;
+      let userData: UserData | null = null;
       if (requests.length > 0) {
-        const dataResponse: any = await provider?.request({
+        const dataResponse = await provider?.request({
           method: "wallet_sendCalls",
           params: [
             {
@@ -146,7 +177,7 @@ export function PaymentModal({
               },
             },
           ],
-        });
+        }) as DataResponse | undefined;
 
         if (dataResponse?.capabilities?.dataCallback) {
           userData = dataResponse.capabilities.dataCallback;
@@ -200,11 +231,12 @@ export function PaymentModal({
 
       setResult(result);
       onSuccess(result);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Payment error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Transaction failed";
       setResult({
         success: false,
-        error: error.message || "Transaction failed",
+        error: errorMessage,
       });
     } finally {
       setIsLoading(false);
