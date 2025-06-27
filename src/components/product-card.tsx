@@ -11,42 +11,41 @@ interface ProductCardProps {
 export function ProductCard({ product, hideImage }: ProductCardProps) {
   return (
     <Link href={`/products/${product.id}`} className="block h-full">
-      <div className="group bg-secondary/10 rounded-lg overflow-hidden border border-secondary/20 hover:border-secondary transition-all duration-200 flex flex-col h-full cursor-pointer">
+      <article className="modern-card group flex flex-col h-full hover-lift animate-fade-in focus-ring-enhanced">
         {/* Image */}
         {!hideImage && (
-          <div className="aspect-square overflow-hidden relative">
+          <div className="aspect-square overflow-hidden relative bg-background-tertiary">
             <Image
               src={product.images[0]}
               alt={product.name}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              className="object-cover group-hover:scale-110 group-hover:brightness-110 transition-all duration-700"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
+            
+            {/* Hover Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            {/* Hover Icon */}
+            <div className="absolute top-4 right-4 bg-primary/90 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300 backdrop-blur">
+              <ShoppingCart className="w-4 h-4" />
+            </div>
           </div>
         )}
         {/* Content */}
-        <div className="p-3 sm:p-4 flex flex-col flex-1">
-          <h3 className="font-medium text-primary-foreground mb-1 sm:mb-2 line-clamp-1 text-base sm:text-lg">
+        <div className="flex flex-col flex-1" style={{ padding: 'var(--card-padding)' }}>
+          <h3 className="text-heading text-foreground mb-4 line-clamp-1">
             {product.name}
           </h3>
-          <p className="text-secondary/70 text-sm mb-2 sm:mb-3 line-clamp-2">
-            {product.description}
-          </p>
-          {/* Price and Action */}
-          <div className="flex items-center justify-between mt-auto">
-            <span className="text-lg sm:text-xl font-bold text-secondary">
-              ${product.price.toFixed(2)}
+          
+          {/* Price */}
+          <div className="mt-auto">
+            <span className="text-price">
+              ${product.price.toFixed(2)} USD
             </span>
-            <Link
-              href={`/products/${product.id}`}
-              className="flex items-center gap-2 bg-pink-500 text-white hover:bg-pink-600 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base rounded transition-all"
-            >
-              <ShoppingCart className="h-4 w-4" />
-              <span className="hidden xs:inline">Customize & Order</span>
-            </Link>
           </div>
         </div>
-      </div>
+      </article>
     </Link>
   );
 } 
