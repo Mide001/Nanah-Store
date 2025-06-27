@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Edit, Trash2, X, Save, Package } from "lucide-react";
+import Image from "next/image";
 
 interface Product {
   id: string;
@@ -156,10 +157,11 @@ export function ProductsManagement({
           <div key={product.id} className="bg-white border rounded-lg p-4 shadow-sm">
             <div className="aspect-square bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
               {product.images[0] ? (
-                <img 
+                <Image 
                   src={product.images[0]} 
                   alt={product.name}
-                  className="w-full h-full object-cover rounded-lg"
+                  fill
+                  className="object-cover rounded-lg"
                 />
               ) : (
                 <Package className="h-12 w-12 text-gray-400" />
