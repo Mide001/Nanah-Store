@@ -50,7 +50,7 @@ export function CartModal({ open, onClose }: { open: boolean; onClose: () => voi
                         <div className="mt-1">
                           <div className="text-xs text-gray-500">Message for Nanah:</div>
                           <div className="text-xs text-gray-700 bg-gray-50 p-2 rounded mt-1">
-                            "{item.customMessage}"
+                            &ldquo;{item.customMessage}&rdquo;
                           </div>
                         </div>
                       )}

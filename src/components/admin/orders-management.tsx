@@ -208,7 +208,7 @@ export function OrdersManagement({ orders, onUpdateStatus }: OrdersManagementPro
                             {item.customMessage && (
                               <div className="mt-2 text-sm">
                                 <span className="font-medium text-gray-700">Message:</span>
-                                <p className="text-gray-600 italic">"{item.customMessage}"</p>
+                                <p className="text-gray-600 italic">&ldquo;{item.customMessage}&rdquo;</p>
                               </div>
                             )}
                           </div>
