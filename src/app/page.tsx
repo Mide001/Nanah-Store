@@ -30,43 +30,43 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground page-transition">
       {/* Modern Header */}
-      <header className="border-b border-border bg-background-secondary animate-slide-in-right">
-        <div className="container-modern py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <h1 className="text-brand hover-scale interactive">NANAH STORE</h1>
+      <header className="header-blur animate-slide-in-right sticky top-0 z-40">
+        <div className="container-modern py-4 lg:py-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center">
+              <h1 className="text-brand hover-scale interactive text-lg sm:text-xl lg:text-2xl">NANAH STORE</h1>
             </div>
             
             {/* Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <a href="#" className="text-foreground-secondary hover:text-foreground transition-all duration-200 interactive">All</a>
-              <a href="#" className="text-foreground-secondary hover:text-foreground transition-all duration-200 interactive">Shirts</a>
-              <a href="#" className="text-foreground-secondary hover:text-foreground transition-all duration-200 interactive">Stickers</a>
+            <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+              <a href="#" className="text-foreground-secondary hover:text-foreground transition-all duration-200 interactive text-sm">All</a>
+              <a href="#" className="text-foreground-secondary hover:text-foreground transition-all duration-200 interactive text-sm">Shirts</a>
+              <a href="#" className="text-foreground-secondary hover:text-foreground transition-all duration-200 interactive text-sm">Stickers</a>
             </nav>
             
             {/* Search and Cart */}
-            <div className="flex items-center space-x-4">
-              <div className="relative hidden sm:block">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="relative hidden md:block search-input">
                 <input
                   type="text"
-                  placeholder="Search for products..."
+                  placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-80 h-12 pl-12 pr-4 bg-background-tertiary border border-border rounded-xl text-foreground placeholder-foreground-muted focus:outline-none focus:border-primary transition-all duration-200 focus-ring-enhanced hover:border-primary/50"
+                  className="w-32 md:w-40 lg:w-48 xl:w-56 h-9 pl-8 pr-3 bg-transparent border-0 rounded-lg text-foreground placeholder-foreground-muted focus:outline-none text-sm"
                 />
-                <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-foreground-muted transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-foreground-muted transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
                 </svg>
               </div>
               
               <button
-                className="relative flex items-center gap-2 text-foreground-secondary hover:text-foreground focus:outline-none transition-all duration-200 interactive hover-scale"
+                className="relative flex items-center text-foreground-secondary hover:text-foreground focus:outline-none transition-all duration-200 interactive hover-scale p-2 rounded-lg"
                 onClick={() => setCartOpen(true)}
                 aria-label="Open cart"
               >
-                <ShoppingCart className="h-6 w-6" />
+                <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
                 {cartItems.length > 0 && (
-                  <span className="cart-badge absolute -top-2 -right-2 bg-primary text-white rounded-full text-xs w-5 h-5 flex items-center justify-center font-medium animate-scale-in">{cartItems.length}</span>
+                  <span className="cart-badge absolute -top-0.5 -right-0.5 bg-primary text-white rounded-full text-xs w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center font-medium animate-scale-in">{cartItems.length}</span>
                 )}
               </button>
             </div>
@@ -84,9 +84,9 @@ export default function Home() {
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`text-body font-medium transition-all duration-200 interactive hover-scale animate-slide-in-right ${
+                  className={`text-body font-medium transition-all duration-200 interactive hover-scale animate-slide-in-right category-btn ${
                     selectedCategory === category
-                      ? 'text-foreground border-b-2 border-primary pb-2'
+                      ? 'text-foreground active'
                       : 'text-foreground-secondary hover:text-foreground'
                   }`}
                   style={{ animationDelay: `${index * 100}ms` }}
@@ -98,16 +98,16 @@ export default function Home() {
           </div>
 
           {/* Mobile Search */}
-          <div className="sm:hidden mb-8 animate-fade-in">
-            <div className="relative">
+          <div className="md:hidden mb-6 animate-fade-in">
+            <div className="relative search-input">
               <input
                 type="text"
-                placeholder="Search for products..."
+                placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full h-12 pl-12 pr-4 bg-background-tertiary border border-border rounded-xl text-body text-foreground placeholder-foreground-muted focus:outline-none focus:border-primary transition-all duration-200 focus-ring-enhanced hover:border-primary/50"
+                className="w-full h-9 pl-8 pr-3 bg-transparent border-0 rounded-lg text-body text-foreground placeholder-foreground-muted focus:outline-none text-sm"
               />
-              <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-foreground-muted transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-foreground-muted transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
               </svg>
             </div>
