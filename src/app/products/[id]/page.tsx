@@ -49,17 +49,18 @@ interface PaymentResult {
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { id } = React.use(params);
   const product = products.find((p) => p.id === id);
-  if (!product) return notFound();
-
-  const [mainImg, setMainImg] = useState(product.images[0]);
+  
+  // Move all hooks to the top before any conditional returns
+  const [mainImg, setMainImg] = useState(product?.images[0] || "");
   const { cartItems, addToCart, clearCart } = useCart();
-  const isInCart = cartItems.some((item: CartItem) => item.id === product.id);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [customMessage, setCustomMessage] = useState<string>("");
 
+  if (!product) return notFound();
+
+  const isInCart = cartItems.some((item: CartItem) => item.id === product.id);
   const canAddToCart = !isInCart && selectedColor && selectedSize;
   const total = cartItems.reduce((sum: number, item: CartItem) => sum + item.price, 0);
 
@@ -74,7 +75,6 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   };
 
   const handlePaymentSuccess = (result: PaymentResult) => {
-    setPaymentResult(result);
     setShowPaymentModal(false);
     if (result.success) {
       clearCart();

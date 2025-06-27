@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Package, ShoppingBag, Users, DollarSign, LogOut } from "lucide-react";
 import { AdminLogin } from "../../components/admin/admin-login";
@@ -39,6 +39,7 @@ interface Product {
 }
 
 export default function AdminPage() {
+  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<"orders" | "products">("orders");
   const [orders, setOrders] = useState<Order[]>([]);
@@ -50,18 +51,7 @@ export default function AdminPage() {
     totalProducts: 0,
   });
 
-  const router = useRouter();
-
-  // Check if admin is authenticated (simple localStorage check)
-  useEffect(() => {
-    const adminToken = localStorage.getItem("admin-token");
-    if (adminToken) {
-      setIsAuthenticated(true);
-      loadData();
-    }
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     // Load orders from localStorage (in real app, this would be from API)
     const storedOrders = localStorage.getItem("orders");
     if (storedOrders) {
@@ -91,7 +81,16 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Failed to load products:", error);
     }
-  };
+  }, [products.length]);
+
+  // Check if admin is authenticated (simple localStorage check)
+  useEffect(() => {
+    const adminToken = localStorage.getItem("admin-token");
+    if (adminToken) {
+      setIsAuthenticated(true);
+      loadData();
+    }
+  }, [loadData]);
 
   const handleLogin = (token: string) => {
     localStorage.setItem("admin-token", token);
