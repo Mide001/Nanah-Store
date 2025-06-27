@@ -28,7 +28,6 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
   const { cartItems, clearCart } = useCart();
 
   const categories = [
@@ -48,7 +47,6 @@ export default function Home() {
   const total = cartItems.reduce((sum: number, item: CartItem) => sum + item.price, 0);
 
   const handlePaymentSuccess = (result: PaymentResult) => {
-    setPaymentResult(result);
     setShowPaymentModal(false);
     if (result.success) {
       clearCart();
