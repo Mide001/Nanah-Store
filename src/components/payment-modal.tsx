@@ -107,7 +107,7 @@ export function PaymentModal({
   // Function to get callback URL
   function getCallbackURL() {
     // Replace this with your actual deployed URL if needed
-    return "https://ea8a-212-102-51-68.ngrok-free.app/api/data-validation";
+    return "https://nanah-store.vercel.app/api/data-validation";
   }
 
   // Handle one-click purchase
