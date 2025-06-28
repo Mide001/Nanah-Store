@@ -7,43 +7,53 @@ import { AdminLogin } from "../../components/admin/admin-login";
 import { OrdersManagement } from "../../components/admin/orders-management";
 import { ProductsManagement } from "../../components/admin/products-management";
 
-interface Order {
+// Database Order type
+interface DatabaseOrder {
   id: string;
   customerName: string;
   customerEmail: string;
-  customerAddress: string;
+  customerPhone?: string;
+  totalAmount: number;
+  status: "PENDING" | "PAID" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  paymentTxHash?: string;
+  createdAt: string;
+  updatedAt: string;
   items: Array<{
     id: string;
-    name: string;
+    productId: string;
+    quantity: number;
     price: number;
-    color: string;
-    size: string;
-    customMessage?: string;
+    product: {
+      id: string;
+      name: string;
+      description: string;
+      price: number;
+      imageUrl: string;
+      category: string;
+    };
   }>;
-  total: number;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  createdAt: string;
-  paymentId: string;
 }
 
-interface Product {
+// Database Product type
+interface DatabaseProduct {
   id: string;
   name: string;
   description: string;
   price: number;
-  category: string;
   images: string[];
-  colors: string[];
-  sizes: string[];
-  estimatedDays: number;
+  category: string;
+  productionDays: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function AdminPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<"orders" | "products">("orders");
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<DatabaseOrder[]>([]);
+  const [products, setProducts] = useState<DatabaseProduct[]>([]);
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -52,43 +62,52 @@ export default function AdminPage() {
   });
 
   const loadData = useCallback(async () => {
-    // Load orders from localStorage (in real app, this would be from API)
-    const storedOrders = localStorage.getItem("orders");
-    if (storedOrders) {
-      const parsedOrders = JSON.parse(storedOrders);
-      setOrders(parsedOrders);
-      
-      const totalRevenue = parsedOrders.reduce((sum: number, order: Order) => 
-        order.status !== "cancelled" ? sum + order.total : sum, 0
-      );
-      const pendingOrders = parsedOrders.filter((order: Order) => 
-        order.status === "pending"
-      ).length;
-
-      setStats({
-        totalOrders: parsedOrders.length,
-        totalRevenue,
-        pendingOrders,
-        totalProducts: products.length,
-      });
-    }
-
-    // Load products from data file
     try {
-      const productsData = await import("@/data/products");
-      setProducts(productsData.products);
-      setStats(prev => ({ ...prev, totalProducts: productsData.products.length }));
-    } catch (error) {
-      console.error("Failed to load products:", error);
-    }
-  }, [products.length]);
+      setLoading(true);
+      
+      // Fetch orders from database
+      const ordersResponse = await fetch('/api/orders');
+      if (ordersResponse.ok) {
+        const ordersData = await ordersResponse.json();
+        setOrders(ordersData);
+        
+        const totalRevenue = ordersData.reduce((sum: number, order: DatabaseOrder) => 
+          order.status !== "CANCELLED" ? sum + order.totalAmount : sum, 0
+        );
+        const pendingOrders = ordersData.filter((order: DatabaseOrder) => 
+          order.status === "PENDING"
+        ).length;
 
-  // Check if admin is authenticated (simple localStorage check)
+        setStats(prev => ({
+          totalOrders: ordersData.length,
+          totalRevenue,
+          pendingOrders,
+          totalProducts: prev.totalProducts,
+        }));
+      }
+
+      // Fetch products from database
+      const productsResponse = await fetch('/api/products');
+      if (productsResponse.ok) {
+        const productsData = await productsResponse.json();
+        setProducts(productsData);
+        setStats(prev => ({ ...prev, totalProducts: productsData.length }));
+      }
+    } catch (error) {
+      console.error("Failed to load data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Check if admin is authenticated
   useEffect(() => {
     const adminToken = localStorage.getItem("admin-token");
     if (adminToken) {
       setIsAuthenticated(true);
       loadData();
+    } else {
+      setLoading(false);
     }
   }, [loadData]);
 
@@ -104,54 +123,88 @@ export default function AdminPage() {
     router.push("/admin");
   };
 
-  const updateOrderStatus = (orderId: string, newStatus: Order["status"]) => {
-    const updatedOrders = orders.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    );
-    setOrders(updatedOrders);
-    localStorage.setItem("orders", JSON.stringify(updatedOrders));
-    
-    // Update stats
-    const totalRevenue = updatedOrders.reduce((sum: number, order: Order) => 
-      order.status !== "cancelled" ? sum + order.total : sum, 0
-    );
-    const pendingOrders = updatedOrders.filter((order: Order) => 
-      order.status === "pending"
-    ).length;
+  const updateOrderStatus = async (orderId: string, newStatus: DatabaseOrder["status"]) => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
 
-    setStats({
-      totalOrders: updatedOrders.length,
-      totalRevenue,
-      pendingOrders,
-      totalProducts: products.length,
-    });
+      if (response.ok) {
+        // Reload data to get updated stats
+        loadData();
+      }
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+    }
   };
 
-  const addProduct = (product: Omit<Product, "id">) => {
-    const newProduct = {
-      ...product,
-      id: Date.now().toString(),
-    };
-    const updatedProducts = [...products, newProduct];
-    setProducts(updatedProducts);
-    setStats(prev => ({ ...prev, totalProducts: updatedProducts.length }));
+  const addProduct = async (product: Omit<DatabaseProduct, "id" | "createdAt" | "updatedAt">) => {
+    try {
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(product),
+      });
+
+      if (response.ok) {
+        loadData(); // Reload data
+      }
+    } catch (error) {
+      console.error("Failed to add product:", error);
+    }
   };
 
-  const updateProduct = (productId: string, updatedProduct: Partial<Product>) => {
-    const updatedProducts = products.map(product => 
-      product.id === productId ? { ...product, ...updatedProduct } : product
-    );
-    setProducts(updatedProducts);
+  const updateProduct = async (productId: string, updatedProduct: Partial<DatabaseProduct>) => {
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedProduct),
+      });
+
+      if (response.ok) {
+        loadData(); // Reload data
+      }
+    } catch (error) {
+      console.error("Failed to update product:", error);
+    }
   };
 
-  const deleteProduct = (productId: string) => {
-    const updatedProducts = products.filter(product => product.id !== productId);
-    setProducts(updatedProducts);
-    setStats(prev => ({ ...prev, totalProducts: updatedProducts.length }));
+  const deleteProduct = async (productId: string) => {
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        loadData(); // Reload data
+      }
+    } catch (error) {
+      console.error("Failed to delete product:", error);
+    }
   };
 
   if (!isAuthenticated) {
     return <AdminLogin onLogin={handleLogin} />;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
