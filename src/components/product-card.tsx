@@ -1,16 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
-import { Product } from "../data/products";
 import { useRouter } from "next/navigation";
+import { convertGoogleDriveUrl } from "@/lib/utils";
+
+// Database Product type
+interface DatabaseProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  category: string;
+  productionDays: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface ProductCardProps {
-  product: Product;
+  product: DatabaseProduct;
   hideImage?: boolean;
 }
 
 export function ProductCard({ product, hideImage }: ProductCardProps) {
   const router = useRouter();
+  const imageUrl = product.images[0] ? convertGoogleDriveUrl(product.images[0]) : '/placeholder-image.jpg';
 
   return (
     <div className="group bg-secondary/10 rounded-lg overflow-hidden border border-secondary/20 hover:border-secondary transition-all duration-200 flex flex-col h-full cursor-pointer">
@@ -18,7 +32,7 @@ export function ProductCard({ product, hideImage }: ProductCardProps) {
         {!hideImage && (
           <div className="aspect-square overflow-hidden relative">
             <Image
-              src={product.images[0]}
+              src={imageUrl}
               alt={product.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
