@@ -1,17 +1,30 @@
 "use client";
 
 import * as React from 'react';
-import { useState } from 'react';
-import { products } from '../../../data/products';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '../../../providers';
 import { PaymentModal } from '@/components/payment-modal';
+import { convertGoogleDriveUrl } from '@/lib/utils';
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
+}
+
+// Database Product type
+interface DatabaseProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  category: string;
+  productionDays: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Color mapping for visual swatches
@@ -48,17 +61,57 @@ interface PaymentResult {
 
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { id } = React.use(params);
-  const product = products.find((p) => p.id === id);
+  const [product, setProduct] = useState<DatabaseProduct | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Move all hooks to the top before any conditional returns
-  const [mainImg, setMainImg] = useState(product?.images[0] || "");
+  const [mainImg, setMainImg] = useState<string>("");
   const { cartItems, addToCart, clearCart } = useCart();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [customMessage, setCustomMessage] = useState<string>("");
 
-  if (!product) return notFound();
+  // Fetch product from database
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch(`/api/products/${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setProduct(data);
+          setMainImg(data.images[0] ? convertGoogleDriveUrl(data.images[0]) : "");
+        } else if (response.status === 404) {
+          setError('Product not found');
+        } else {
+          setError('Failed to load product');
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        setError('Failed to load product');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white text-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading product...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return notFound();
+  }
 
   const isInCart = cartItems.some((item: CartItem) => item.id === product.id);
   const canAddToCart = !isInCart && selectedColor && selectedSize;
@@ -81,6 +134,10 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     }
   };
 
+  // Default colors and sizes since they're not in the database schema
+  const defaultColors = ['Pink', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange', 'Red', 'White', 'Black', 'Gray'];
+  const defaultSizes = ['Small', 'Medium', 'Large', 'X-Large'];
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Small Header with Context */}
@@ -90,14 +147,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       {/* Main Header */}
       <header className="border-b border-gray-200 p-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center">
             <h1 className="text-xl font-bold">Nanah Store</h1>
-            <a
-              href="/admin"
-              className="text-sm text-gray-500 hover:text-pink-500 transition-colors"
-            >
-              Admin
-            </a>
           </div>
           <button
             className="relative flex items-center gap-2 text-pink-500 hover:text-pink-600 focus:outline-none"
@@ -119,20 +170,33 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             {/* Images */}
             <div className="flex flex-col gap-4 md:w-1/2">
               <div className="relative w-full aspect-square rounded-lg overflow-hidden border">
-                <Image src={mainImg} alt={product.name} fill className="object-cover" priority />
+                <Image 
+                  src={mainImg || '/placeholder-image.jpg'} 
+                  alt={product.name} 
+                  fill 
+                  className="object-cover" 
+                  priority 
+                />
               </div>
-              <div className="flex gap-2 mt-2">
-                {product.images.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setMainImg(img)}
-                    className={`relative w-16 h-16 rounded border-2 ${mainImg === img ? 'border-pink-500' : 'border-gray-200'} overflow-hidden focus:outline-none`}
-                    aria-label={`Show image ${i + 1}`}
-                  >
-                    <Image src={img} alt={product.name + ' thumbnail ' + (i + 1)} fill className="object-cover" />
-                  </button>
-                ))}
-              </div>
+              {product.images.length > 1 && (
+                <div className="flex gap-2 mt-2">
+                  {product.images.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setMainImg(convertGoogleDriveUrl(img))}
+                      className={`relative w-16 h-16 rounded border-2 ${mainImg === convertGoogleDriveUrl(img) ? 'border-pink-500' : 'border-gray-200'} overflow-hidden focus:outline-none`}
+                      aria-label={`Show image ${i + 1}`}
+                    >
+                      <Image 
+                        src={convertGoogleDriveUrl(img)} 
+                        alt={product.name + ' thumbnail ' + (i + 1)} 
+                        fill 
+                        className="object-cover" 
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             {/* Info */}
             <div className="flex-1 flex flex-col justify-between">
@@ -142,12 +206,18 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 <div className="text-gray-500 mb-2">Category: <span className="font-medium text-gray-800">{product.category}</span></div>
                 <p className="text-gray-700 text-lg mb-4 leading-relaxed">{product.description}</p>
                 <div className="mb-4">
-                  <span className="block text-gray-700 font-medium mb-1">Estimated completion: <span className="text-pink-600 font-semibold">{product.estimatedDays} days</span></span>
+                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                    product.productionDays > 0 
+                      ? "bg-green-100 text-green-800" 
+                      : "bg-red-100 text-red-800"
+                  }`}>
+                    {product.productionDays > 0 ? `In Production (${product.productionDays} days)` : "Out of Stock"}
+                  </span>
                 </div>
                 <div className="mb-4 flex flex-col gap-2">
                   <label className="font-medium text-gray-700">Select color:</label>
                   <div className="flex gap-2 flex-wrap items-center">
-                    {product.colors.map((color) => (
+                    {defaultColors.map((color) => (
                       <button
                         key={color}
                         type="button"
@@ -168,7 +238,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 <div className="mb-4 flex flex-col gap-2">
                   <label className="font-medium text-gray-700">Select size:</label>
                   <div className="flex gap-2 flex-wrap">
-                    {product.sizes.map((size) => (
+                    {defaultSizes.map((size) => (
                       <button
                         key={size}
                         type="button"
@@ -200,15 +270,25 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               <button
                 onClick={handleAddToCart}
                 disabled={!canAddToCart}
-                className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm border-none focus:outline-none ${isInCart ? 'bg-green-100 text-green-600 cursor-not-allowed' : !canAddToCart ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-pink-500 text-white hover:bg-pink-600'}`}
+                className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm border-none focus:outline-none ${
+                  isInCart 
+                    ? 'bg-green-100 text-green-600 cursor-not-allowed' 
+                    : !canAddToCart
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                    : 'bg-pink-500 text-white hover:bg-pink-600'
+                }`}
               >
                 {isInCart ? (
                   <>
-                    <Check className="h-5 w-5" /> In Cart
+                    <Check className="h-5 w-5" />
+                    Added to Cart
                   </>
+                ) : !canAddToCart ? (
+                  'Select Color & Size'
                 ) : (
                   <>
-                    <ShoppingCart className="h-5 w-5" /> Add to Cart
+                    <ShoppingCart className="h-5 w-5" />
+                    Add to Cart
                   </>
                 )}
               </button>
@@ -216,7 +296,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           </div>
         </div>
       </div>
-      
+
       {/* Payment Modal */}
       <PaymentModal
         isOpen={showPaymentModal}
