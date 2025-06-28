@@ -3,40 +3,48 @@
 import { useState } from "react";
 import { Eye, Package, Truck, CheckCircle, XCircle, Clock } from "lucide-react";
 
-interface Order {
+// Database Order type
+interface DatabaseOrder {
   id: string;
   customerName: string;
   customerEmail: string;
-  customerAddress: string;
+  customerPhone?: string;
+  totalAmount: number;
+  status: "PENDING" | "PAID" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  paymentTxHash?: string;
+  createdAt: string;
+  updatedAt: string;
   items: Array<{
     id: string;
-    name: string;
+    productId: string;
+    quantity: number;
     price: number;
-    color: string;
-    size: string;
-    customMessage?: string;
+    product: {
+      id: string;
+      name: string;
+      description: string;
+      price: number;
+      imageUrl: string;
+      category: string;
+    };
   }>;
-  total: number;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  createdAt: string;
-  paymentId: string;
 }
 
 interface OrdersManagementProps {
-  orders: Order[];
-  onUpdateStatus: (orderId: string, status: Order["status"]) => void;
+  orders: DatabaseOrder[];
+  onUpdateStatus: (orderId: string, status: DatabaseOrder["status"]) => void;
 }
 
 const statusConfig = {
-  pending: { label: "Pending", color: "bg-yellow-100 text-yellow-800", icon: Clock },
-  processing: { label: "Processing", color: "bg-blue-100 text-blue-800", icon: Package },
-  shipped: { label: "Shipped", color: "bg-purple-100 text-purple-800", icon: Truck },
-  delivered: { label: "Delivered", color: "bg-green-100 text-green-800", icon: CheckCircle },
-  cancelled: { label: "Cancelled", color: "bg-red-100 text-red-800", icon: XCircle },
+  PENDING: { label: "Pending", color: "bg-yellow-100 text-yellow-800", icon: Clock },
+  PAID: { label: "Paid", color: "bg-blue-100 text-blue-800", icon: Package },
+  SHIPPED: { label: "Shipped", color: "bg-purple-100 text-purple-800", icon: Truck },
+  DELIVERED: { label: "Delivered", color: "bg-green-100 text-green-800", icon: CheckCircle },
+  CANCELLED: { label: "Cancelled", color: "bg-red-100 text-red-800", icon: XCircle },
 };
 
 export function OrdersManagement({ orders, onUpdateStatus }: OrdersManagementProps) {
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<DatabaseOrder | null>(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
 
   const formatDate = (dateString: string) => {
@@ -49,7 +57,7 @@ export function OrdersManagement({ orders, onUpdateStatus }: OrdersManagementPro
     });
   };
 
-  const handleViewOrder = (order: Order) => {
+  const handleViewOrder = (order: DatabaseOrder) => {
     setSelectedOrder(order);
     setShowOrderModal(true);
   };
@@ -118,7 +126,7 @@ export function OrdersManagement({ orders, onUpdateStatus }: OrdersManagementPro
                     {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ${order.total.toFixed(2)}
+                    ${order.totalAmount.toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
@@ -139,14 +147,14 @@ export function OrdersManagement({ orders, onUpdateStatus }: OrdersManagementPro
                       </button>
                       <select
                         value={order.status}
-                        onChange={(e) => onUpdateStatus(order.id, e.target.value as Order["status"])}
+                        onChange={(e) => onUpdateStatus(order.id, e.target.value as DatabaseOrder["status"])}
                         className="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-pink-500 text-gray-900 bg-white"
                       >
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="PAID">Paid</option>
+                        <option value="SHIPPED">Shipped</option>
+                        <option value="DELIVERED">Delivered</option>
+                        <option value="CANCELLED">Cancelled</option>
                       </select>
                     </div>
                   </td>
@@ -185,9 +193,16 @@ export function OrdersManagement({ orders, onUpdateStatus }: OrdersManagementPro
                     <div>
                       <span className="font-medium">Email:</span> {selectedOrder.customerEmail}
                     </div>
-                    <div className="md:col-span-2">
-                      <span className="font-medium">Address:</span> {selectedOrder.customerAddress}
-                    </div>
+                    {selectedOrder.customerPhone && (
+                      <div>
+                        <span className="font-medium">Phone:</span> {selectedOrder.customerPhone}
+                      </div>
+                    )}
+                    {selectedOrder.paymentTxHash && (
+                      <div>
+                        <span className="font-medium">Payment Hash:</span> {selectedOrder.paymentTxHash}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -199,21 +214,15 @@ export function OrdersManagement({ orders, onUpdateStatus }: OrdersManagementPro
                       <div key={index} className="border rounded-lg p-3">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <h5 className="font-medium text-gray-900">{item.name}</h5>
+                            <h5 className="font-medium text-gray-900">{item.product.name}</h5>
                             <div className="mt-1 text-sm text-gray-600">
-                              <span>Color: {item.color}</span>
+                              <span>Quantity: {item.quantity}</span>
                               <span className="mx-2">•</span>
-                              <span>Size: {item.size}</span>
+                              <span>Price: ${item.price.toFixed(2)}</span>
                             </div>
-                            {item.customMessage && (
-                              <div className="mt-2 text-sm">
-                                <span className="font-medium text-gray-700">Message:</span>
-                                <p className="text-gray-600 italic">&ldquo;{item.customMessage}&rdquo;</p>
-                              </div>
-                            )}
                           </div>
                           <div className="text-right">
-                            <div className="font-medium text-gray-900">${item.price.toFixed(2)}</div>
+                            <div className="font-medium text-gray-900">${(item.quantity * item.price).toFixed(2)}</div>
                           </div>
                         </div>
                       </div>
@@ -224,14 +233,8 @@ export function OrdersManagement({ orders, onUpdateStatus }: OrdersManagementPro
                 {/* Order Summary */}
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-gray-900">Total:</span>
-                    <span className="text-xl font-bold text-gray-900">${selectedOrder.total.toFixed(2)}</span>
-                  </div>
-                  <div className="mt-2 text-sm text-gray-500">
-                    Payment ID: {selectedOrder.paymentId}
-                  </div>
-                  <div className="mt-2 text-sm text-gray-500">
-                    Order Date: {formatDate(selectedOrder.createdAt)}
+                    <span className="font-medium text-gray-900">Total Amount:</span>
+                    <span className="text-lg font-bold text-gray-900">${selectedOrder.totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
