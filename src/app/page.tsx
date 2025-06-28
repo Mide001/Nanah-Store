@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProductCard } from "../components/product-card";
-import { products as allProducts } from "../data/products";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "../providers";
 import { PaymentModal } from "@/components/payment-modal";
@@ -24,18 +23,54 @@ interface CartItem {
   customMessage?: string;
 }
 
+// Database Product type
+interface DatabaseProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  category: string;
+  productionDays: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [products, setProducts] = useState<DatabaseProduct[]>([]);
+  const [loading, setLoading] = useState(true);
   const { cartItems, clearCart } = useCart();
+
+  // Fetch products from database
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/products');
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data);
+        } else {
+          console.error('Failed to fetch products');
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const categories = [
     "All",
-    ...Array.from(new Set(allProducts.map((p) => p.category))),
+    ...Array.from(new Set(products.map((p) => p.category))),
   ];
 
-  const filteredProducts = allProducts.filter((product) => {
+  const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -53,6 +88,17 @@ export default function Home() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white text-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Small Header with Context */}
@@ -63,14 +109,8 @@ export default function Home() {
       {/* Main Header */}
       <header className="border-b border-gray-200 p-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center">
             <h1 className="text-xl font-bold">Nanah Store</h1>
-            <a
-              href="/admin"
-              className="text-sm text-gray-500 hover:text-pink-500 transition-colors"
-            >
-              Admin
-            </a>
           </div>
           <button
             className="relative flex items-center gap-2 text-pink-500 hover:text-pink-600 focus:outline-none"
@@ -116,7 +156,9 @@ export default function Home() {
         {/* Simple Uniform Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredProducts.length === 0 && (
-            <div className="text-center text-gray-400 col-span-full py-12">No products found.</div>
+            <div className="text-center text-gray-400 col-span-full py-12">
+              {products.length === 0 ? "No products available." : "No products found."}
+            </div>
           )}
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
