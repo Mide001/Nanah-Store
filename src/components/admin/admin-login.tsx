@@ -18,7 +18,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
     setError("");
 
     // Simple admin authentication (in production, this would be server-side)
-    if (username === "admin" && password === "nanah123") {
+    if (username === "admin" && password === "admin123") {
       const token = btoa(`${username}:${Date.now()}`);
       onLogin(token);
     } else {
@@ -119,7 +119,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
             </div>
             <div className="mt-4 text-center text-xs text-gray-500">
               <p>Username: <strong>admin</strong></p>
-              <p>Password: <strong>nanah123</strong></p>
+              <p>Password: <strong>admin123</strong></p>
             </div>
           </div>
         </div>
