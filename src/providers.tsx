@@ -3,12 +3,24 @@ import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { getConfig } from "./wagmi";
 import { ReactNode, createContext, useContext, useState } from "react";
-import { Product } from "./data/products";
 
 const queryClient = new QueryClient();
 const config = getConfig();
 
-interface CartItem extends Product {
+// Database Product type
+interface DatabaseProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  category: string;
+  productionDays: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CartItem extends DatabaseProduct {
   color: string;
   size: string;
   customMessage?: string;
@@ -17,7 +29,7 @@ interface CartItem extends Product {
 interface CartContextType {
   cartItems: CartItem[];
   addToCart: (
-    product: Product,
+    product: DatabaseProduct,
     options: { color: string; size: string; customMessage?: string }
   ) => void;
   removeFromCart: (productId: string) => void;
@@ -30,7 +42,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   const addToCart = (
-    product: Product,
+    product: DatabaseProduct,
     options: { color: string; size: string; customMessage?: string }
   ) => {
     setCartItems((prev) =>
