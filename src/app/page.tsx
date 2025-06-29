@@ -36,33 +36,52 @@ interface DatabaseProduct {
   updatedAt: string;
 }
 
+// Store Settings type
+interface StoreSettings {
+  id: string;
+  storeName: string;
+  description: string;
+  updatedAt: string;
+}
+
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [products, setProducts] = useState<DatabaseProduct[]>([]);
+  const [storeSettings, setStoreSettings] = useState<StoreSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const { cartItems, clearCart } = useCart();
 
-  // Fetch products from database
+  // Fetch products and store settings from database
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/products');
-        if (response.ok) {
-          const data = await response.json();
-          setProducts(data);
+        // Fetch products
+        const productsResponse = await fetch('/api/products');
+        if (productsResponse.ok) {
+          const productsData = await productsResponse.json();
+          setProducts(productsData);
         } else {
           console.error('Failed to fetch products');
         }
+
+        // Fetch store settings
+        const settingsResponse = await fetch('/api/store-settings');
+        if (settingsResponse.ok) {
+          const settingsData = await settingsResponse.json();
+          setStoreSettings(settingsData);
+        } else {
+          console.error('Failed to fetch store settings');
+        }
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchData();
   }, []);
 
   const categories = [
@@ -103,14 +122,18 @@ export default function Home() {
     <div className="min-h-screen bg-white text-gray-900">
       {/* Small Header with Context */}
       <div className="bg-gray-100 text-gray-700 py-2 px-4 text-center">
-        <span className="text-sm font-medium">Nanah Store: Unique, handcrafted crochet items</span>
+        <span className="text-sm font-medium">
+          {storeSettings?.description || "Nanah Store: Unique, handcrafted crochet items"}
+        </span>
       </div>
 
       {/* Main Header */}
       <header className="border-b border-gray-200 p-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
           <div className="flex items-center">
-            <h1 className="text-xl font-bold">Nanah Store</h1>
+            <h1 className="text-xl font-bold">
+              {storeSettings?.storeName || "Nanah Store"}
+            </h1>
           </div>
           <button
             className="relative flex items-center gap-2 text-pink-500 hover:text-pink-600 focus:outline-none"
