@@ -53,6 +53,13 @@ model Admin {
   createdAt DateTime @default(now())
 }
 
+model StoreSettings {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeName   String   @default("Nanah Store")
+  description String   @default("Unique, handcrafted crochet items")
+  updatedAt   DateTime @updatedAt
+}
+
 enum OrderStatus {
   PENDING
   PAID
