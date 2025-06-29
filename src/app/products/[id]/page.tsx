@@ -158,38 +158,40 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Small Header with Context */}
-      <div className="bg-gray-100 text-gray-700 py-2 px-4 text-center">
-        <span className="text-sm font-medium">
+      <div className="bg-gray-100 text-gray-700 py-2 px-3 sm:px-4 text-center">
+        <span className="text-xs sm:text-sm font-medium leading-tight">
           {storeSettings?.description || "Nanah Store: Unique, handcrafted crochet items"}
         </span>
       </div>
       {/* Main Header */}
-      <header className="border-b border-gray-200 p-4">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+      <header className="border-b border-gray-200 p-3 sm:p-4">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 sm:gap-0">
           <div className="flex items-center">
-            <h1 className="text-xl font-bold">
+            <h1 className="text-lg sm:text-xl font-bold">
               {storeSettings?.storeName || "Nanah Store"}
             </h1>
           </div>
           <button
-            className="relative flex items-center gap-2 text-pink-500 hover:text-pink-600 focus:outline-none"
+            className="relative flex items-center gap-1 sm:gap-2 text-pink-500 hover:text-pink-600 focus:outline-none p-2 rounded-lg hover:bg-pink-50 transition-colors"
             onClick={() => setShowPaymentModal(true)}
             aria-label="Checkout"
             disabled={cartItems.length === 0}
           >
-            <ShoppingCart className="h-7 w-7" />
+            <ShoppingCart className="h-6 w-6 sm:h-7 sm:w-7" />
             {cartItems.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-pink-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">{cartItems.length}</span>
+              <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-pink-500 text-white rounded-full text-xs w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center font-medium">
+                {cartItems.length}
+              </span>
             )}
           </button>
         </div>
       </header>
-      <div className="py-10 px-4 flex flex-col items-center">
+      <div className="py-6 sm:py-10 px-3 sm:px-4 flex flex-col items-center">
         <div className="w-full max-w-3xl">
-          <Link href="/" className="text-pink-500 hover:underline mb-6 inline-block">&larr; Back to store</Link>
-          <div className="flex flex-col md:flex-row gap-10 bg-white rounded-xl border border-gray-200 p-6">
+          <Link href="/" className="text-pink-500 hover:underline mb-4 sm:mb-6 inline-block text-sm sm:text-base">&larr; Back to store</Link>
+          <div className="flex flex-col md:flex-row gap-6 sm:gap-10 bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
             {/* Images */}
-            <div className="flex flex-col gap-4 md:w-1/2">
+            <div className="flex flex-col gap-3 sm:gap-4 md:w-1/2">
               <div className="relative w-full aspect-square rounded-lg overflow-hidden border">
                 <Image 
                   src={mainImg || '/placeholder-image.jpg'} 
@@ -197,15 +199,16 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                   fill 
                   className="object-cover" 
                   priority 
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
               {product.images.length > 1 && (
-                <div className="flex gap-2 mt-2">
+                <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
                   {product.images.map((img, i) => (
                     <button
                       key={i}
                       onClick={() => setMainImg(convertGoogleDriveUrl(img))}
-                      className={`relative w-16 h-16 rounded border-2 ${mainImg === convertGoogleDriveUrl(img) ? 'border-pink-500' : 'border-gray-200'} overflow-hidden focus:outline-none`}
+                      className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded border-2 flex-shrink-0 ${mainImg === convertGoogleDriveUrl(img) ? 'border-pink-500' : 'border-gray-200'} overflow-hidden focus:outline-none`}
                       aria-label={`Show image ${i + 1}`}
                     >
                       <Image 
@@ -222,10 +225,10 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             {/* Info */}
             <div className="flex-1 flex flex-col justify-between">
               <div>
-                <h1 className="text-3xl font-bold mb-2 leading-tight">{product.name}</h1>
-                <div className="text-pink-500 font-semibold text-2xl mb-2">${product.price.toFixed(2)}</div>
-                <div className="text-gray-500 mb-2">Category: <span className="font-medium text-gray-800">{product.category}</span></div>
-                <p className="text-gray-700 text-lg mb-4 leading-relaxed">{product.description}</p>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2 leading-tight">{product.name}</h1>
+                <div className="text-pink-500 font-semibold text-xl sm:text-2xl mb-2">${product.price.toFixed(2)}</div>
+                <div className="text-gray-500 mb-2 text-sm sm:text-base">Category: <span className="font-medium text-gray-800">{product.category}</span></div>
+                <p className="text-gray-700 text-base sm:text-lg mb-4 leading-relaxed">{product.description}</p>
                 <div className="mb-4">
                   <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
                     product.productionDays > 0 
@@ -236,13 +239,13 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                   </span>
                 </div>
                 <div className="mb-4 flex flex-col gap-2">
-                  <label className="font-medium text-gray-700">Select color:</label>
+                  <label className="font-medium text-gray-700 text-sm sm:text-base">Select color:</label>
                   <div className="flex gap-2 flex-wrap items-center">
                     {defaultColors.map((color) => (
                       <button
                         key={color}
                         type="button"
-                        className={`w-10 h-10 rounded-full border-2 transition-all hover:scale-110 ${selectedColor === color ? 'border-pink-500 ring-2 ring-pink-200' : 'border-gray-300'}`}
+                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-all hover:scale-110 touch-manipulation ${selectedColor === color ? 'border-pink-500 ring-2 ring-pink-200' : 'border-gray-300'}`}
                         style={{ backgroundColor: colorMap[color] || color }}
                         onClick={() => setSelectedColor(color)}
                         title={color}
@@ -251,19 +254,19 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                     ))}
                   </div>
                   {selectedColor && (
-                    <div className="text-sm text-gray-600 mt-1">
+                    <div className="text-xs sm:text-sm text-gray-600 mt-1">
                       Selected: <span className="font-medium">{selectedColor}</span>
                     </div>
                   )}
                 </div>
                 <div className="mb-4 flex flex-col gap-2">
-                  <label className="font-medium text-gray-700">Select size:</label>
+                  <label className="font-medium text-gray-700 text-sm sm:text-base">Select size:</label>
                   <div className="flex gap-2 flex-wrap">
                     {defaultSizes.map((size) => (
                       <button
                         key={size}
                         type="button"
-                        className={`px-3 py-1 rounded border text-sm font-medium transition-colors ${selectedSize === size ? 'bg-pink-500 text-white border-pink-500' : 'bg-white text-gray-800 border-gray-300 hover:bg-pink-50'}`}
+                        className={`px-2.5 sm:px-3 py-1.5 sm:py-1 rounded border text-xs sm:text-sm font-medium transition-colors touch-manipulation ${selectedSize === size ? 'bg-pink-500 text-white border-pink-500' : 'bg-white text-gray-800 border-gray-300 hover:bg-pink-50'}`}
                         onClick={() => setSelectedSize(size)}
                       >
                         {size}
@@ -272,14 +275,14 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                   </div>
                 </div>
                 <div className="mb-6 flex flex-col gap-2">
-                  <label className="font-medium text-gray-700">
+                  <label className="font-medium text-gray-700 text-sm sm:text-base">
                     Custom message for Nanah (optional):
                   </label>
                   <textarea
                     value={customMessage}
                     onChange={(e) => setCustomMessage(e.target.value)}
                     placeholder="Any special requests or messages for Nanah..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-pink-400 resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-pink-400 resize-none text-sm sm:text-base"
                     rows={3}
                     maxLength={500}
                   />
@@ -291,7 +294,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               <button
                 onClick={handleAddToCart}
                 disabled={!canAddToCart}
-                className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm border-none focus:outline-none ${
+                className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg text-base sm:text-lg font-semibold transition-all shadow-sm border-none focus:outline-none touch-manipulation ${
                   isInCart 
                     ? 'bg-green-100 text-green-600 cursor-not-allowed' 
                     : !canAddToCart
@@ -301,14 +304,14 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               >
                 {isInCart ? (
                   <>
-                    <Check className="h-5 w-5" />
+                    <Check className="h-4 w-4 sm:h-5 sm:w-5" />
                     Added to Cart
                   </>
                 ) : !canAddToCart ? (
                   'Select Color & Size'
                 ) : (
                   <>
-                    <ShoppingCart className="h-5 w-5" />
+                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
                     Add to Cart
                   </>
                 )}
