@@ -6,6 +6,7 @@ import { Package, ShoppingBag, Users, DollarSign, LogOut } from "lucide-react";
 import { AdminLogin } from "../../components/admin/admin-login";
 import { OrdersManagement } from "../../components/admin/orders-management";
 import { ProductsManagement } from "../../components/admin/products-management";
+import { StoreSettings } from "../../components/admin/store-settings";
 
 // Database Order type
 interface DatabaseOrder {
@@ -47,12 +48,21 @@ interface DatabaseProduct {
   updatedAt: string;
 }
 
+// Store Settings type
+interface StoreSettings {
+  id: string;
+  storeName: string;
+  description: string;
+  updatedAt: string;
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<"orders" | "products">("orders");
+  const [activeTab, setActiveTab] = useState<"orders" | "products" | "settings">("orders");
   const [orders, setOrders] = useState<DatabaseOrder[]>([]);
   const [products, setProducts] = useState<DatabaseProduct[]>([]);
+  const [storeSettings, setStoreSettings] = useState<StoreSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalOrders: 0,
@@ -92,6 +102,13 @@ export default function AdminPage() {
         const productsData = await productsResponse.json();
         setProducts(productsData);
         setStats(prev => ({ ...prev, totalProducts: productsData.length }));
+      }
+
+      // Fetch store settings
+      const settingsResponse = await fetch('/api/store-settings');
+      if (settingsResponse.ok) {
+        const settingsData = await settingsResponse.json();
+        setStoreSettings(settingsData);
       }
     } catch (error) {
       console.error("Failed to load data:", error);
@@ -192,6 +209,25 @@ export default function AdminPage() {
     }
   };
 
+  const updateStoreSettings = async (settings: Partial<StoreSettings>) => {
+    try {
+      const response = await fetch('/api/store-settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings),
+      });
+
+      if (response.ok) {
+        const updatedSettings = await response.json();
+        setStoreSettings(updatedSettings);
+      }
+    } catch (error) {
+      console.error("Failed to update store settings:", error);
+    }
+  };
+
   if (!isAuthenticated) {
     return <AdminLogin onLogin={handleLogin} />;
   }
@@ -214,7 +250,9 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">Nanah Store Admin</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {storeSettings?.storeName || "Nanah Store"} Admin
+              </h1>
             </div>
             <button
               onClick={handleLogout}
@@ -303,6 +341,16 @@ export default function AdminPage() {
               >
                 Products Management
               </button>
+              <button
+                onClick={() => setActiveTab("settings")}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "settings"
+                    ? "border-pink-500 text-pink-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Store Settings
+              </button>
             </nav>
           </div>
 
@@ -312,12 +360,17 @@ export default function AdminPage() {
                 orders={orders} 
                 onUpdateStatus={updateOrderStatus}
               />
-            ) : (
+            ) : activeTab === "products" ? (
               <ProductsManagement 
                 products={products}
                 onAddProduct={addProduct}
                 onUpdateProduct={updateProduct}
                 onDeleteProduct={deleteProduct}
+              />
+            ) : (
+              <StoreSettings 
+                settings={storeSettings}
+                onUpdateSettings={updateStoreSettings}
               />
             )}
           </div>
