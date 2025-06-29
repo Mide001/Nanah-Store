@@ -245,31 +245,31 @@ export function PaymentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md bg-white border-gray-200 text-gray-900">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-pink-500" />
+      <DialogContent className="mobile-modal bg-white border-gray-200 text-gray-900">
+        <DialogHeader className="space-y-2">
+          <DialogTitle className="text-responsive-lg font-bold flex items-center gap-2">
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-pink-500" />
             Checkout & Pay
           </DialogTitle>
-          <DialogDescription className="text-gray-500">
+          <DialogDescription className="text-responsive-sm text-gray-500">
             Pay in USDC and share your info for delivery
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-responsive">
           {/* Payment Summary */}
-          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="p-responsive bg-gray-50 rounded-lg border border-gray-200">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm">Cart Items:</span>
-              <span className="text-sm font-medium">{cartItems.length}</span>
+              <span className="text-responsive-xs">Cart Items:</span>
+              <span className="text-responsive-xs font-medium">{cartItems.length}</span>
             </div>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm">Total Value:</span>
-              <span className="text-sm font-medium">${total.toFixed(2)}</span>
+              <span className="text-responsive-xs">Total Value:</span>
+              <span className="text-responsive-xs font-medium">${total.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-              <span className="font-medium">Payment Required:</span>
-              <span className="font-bold text-pink-500">
+              <span className="text-responsive-sm font-medium">Payment Required:</span>
+              <span className="text-responsive-sm font-bold text-pink-500">
                 {total.toFixed(2)} USDC
               </span>
             </div>
@@ -277,8 +277,8 @@ export function PaymentModal({
 
           {/* Profile Data Selection */}
           <div className="space-y-3">
-            <h3 className="text-sm font-medium">Share Profile Data:</h3>
-            <div className="flex items-center space-x-3">
+            <h3 className="text-responsive-sm font-medium">Share Profile Data:</h3>
+            <div className="flex items-center space-x-3 p-2">
               <Checkbox
                 id="email"
                 checked={dataToRequest.email}
@@ -288,12 +288,12 @@ export function PaymentModal({
               />
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-gray-400" />
-                <label htmlFor="email" className="text-sm cursor-pointer">
+                <label htmlFor="email" className="text-responsive-sm cursor-pointer">
                   Email Address
                 </label>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 p-2">
               <Checkbox
                 id="address"
                 checked={dataToRequest.address}
@@ -303,7 +303,7 @@ export function PaymentModal({
               />
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4 text-gray-400" />
-                <label htmlFor="address" className="text-sm cursor-pointer">
+                <label htmlFor="address" className="text-responsive-sm cursor-pointer">
                   Physical Address
                 </label>
               </div>
@@ -312,19 +312,20 @@ export function PaymentModal({
 
           {/* Privacy Policy Acceptance */}
           <div className="space-y-3">
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
               <Checkbox
                 id="privacy-accept"
                 checked={hasAcceptedPrivacy}
                 onCheckedChange={(checked: boolean) =>
                   setHasAcceptedPrivacy(!!checked)
                 }
+                className="mt-0.5"
               />
-              <div className="flex items-center space-x-2">
-                <Shield className="h-4 w-4 text-gray-400" />
+              <div className="flex items-start space-x-2">
+                <Shield className="h-4 w-4 text-gray-400 mt-0.5" />
                 <label
                   htmlFor="privacy-accept"
-                  className="text-sm cursor-pointer"
+                  className="text-responsive-xs cursor-pointer leading-relaxed"
                 >
                   I agree to the{" "}
                   <button
@@ -344,7 +345,7 @@ export function PaymentModal({
           <Button
             onClick={handlePayment}
             disabled={isLoading || !provider || !hasAcceptedPrivacy}
-            className="w-full bg-pink-500 text-white hover:bg-pink-600"
+            className="w-full bg-pink-500 text-white hover:bg-pink-600 text-responsive-sm py-3 touch-manipulation mobile-button"
             size="lg"
           >
             {isLoading ? (
@@ -371,7 +372,7 @@ export function PaymentModal({
             >
               {result.success ? (
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-pink-500">
+                  <h3 className="text-responsive-sm font-medium text-pink-500">
                     Payment Successful! 🎉
                   </h3>
                   {result.name && (
@@ -392,7 +393,7 @@ export function PaymentModal({
                 </div>
               ) : (
                 <div>
-                  <h3 className="text-sm font-medium text-red-500">Error</h3>
+                  <h3 className="text-responsive-sm font-medium text-red-500">Error</h3>
                   <p className="text-xs text-red-400">{result.error}</p>
                 </div>
               )}
