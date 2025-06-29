@@ -27,6 +27,14 @@ interface DatabaseProduct {
   updatedAt: string;
 }
 
+// Store Settings type
+interface StoreSettings {
+  id: string;
+  storeName: string;
+  description: string;
+  updatedAt: string;
+}
+
 // Color mapping for visual swatches
 const colorMap: { [key: string]: string } = {
   'Red': '#ef4444',
@@ -62,6 +70,7 @@ interface PaymentResult {
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { id } = React.use(params);
   const [product, setProduct] = useState<DatabaseProduct | null>(null);
+  const [storeSettings, setStoreSettings] = useState<StoreSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -73,29 +82,37 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [customMessage, setCustomMessage] = useState<string>("");
 
-  // Fetch product from database
+  // Fetch product and store settings from database
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`/api/products/${id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setProduct(data);
-          setMainImg(data.images[0] ? convertGoogleDriveUrl(data.images[0]) : "");
-        } else if (response.status === 404) {
+        // Fetch product
+        const productResponse = await fetch(`/api/products/${id}`);
+        if (productResponse.ok) {
+          const productData = await productResponse.json();
+          setProduct(productData);
+          setMainImg(productData.images[0] ? convertGoogleDriveUrl(productData.images[0]) : "");
+        } else if (productResponse.status === 404) {
           setError('Product not found');
         } else {
           setError('Failed to load product');
         }
+
+        // Fetch store settings
+        const settingsResponse = await fetch('/api/store-settings');
+        if (settingsResponse.ok) {
+          const settingsData = await settingsResponse.json();
+          setStoreSettings(settingsData);
+        }
       } catch (error) {
-        console.error('Error fetching product:', error);
-        setError('Failed to load product');
+        console.error('Error fetching data:', error);
+        setError('Failed to load data');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProduct();
+    fetchData();
   }, [id]);
 
   if (loading) {
@@ -142,13 +159,17 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     <div className="min-h-screen bg-white text-gray-900">
       {/* Small Header with Context */}
       <div className="bg-gray-100 text-gray-700 py-2 px-4 text-center">
-        <span className="text-sm font-medium">Nanah Store: Unique, handcrafted crochet items</span>
+        <span className="text-sm font-medium">
+          {storeSettings?.description || "Nanah Store: Unique, handcrafted crochet items"}
+        </span>
       </div>
       {/* Main Header */}
       <header className="border-b border-gray-200 p-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
           <div className="flex items-center">
-            <h1 className="text-xl font-bold">Nanah Store</h1>
+            <h1 className="text-xl font-bold">
+              {storeSettings?.storeName || "Nanah Store"}
+            </h1>
           </div>
           <button
             className="relative flex items-center gap-2 text-pink-500 hover:text-pink-600 focus:outline-none"
