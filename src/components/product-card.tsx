@@ -27,7 +27,7 @@ export function ProductCard({ product, hideImage }: ProductCardProps) {
   const imageUrl = product.images[0] ? convertGoogleDriveUrl(product.images[0]) : '/placeholder-image.jpg';
 
   return (
-    <div className="group bg-secondary/10 rounded-lg overflow-hidden border border-secondary/20 hover:border-secondary transition-all duration-200 flex flex-col h-full cursor-pointer">
+    <div className="group mobile-card hover:border-secondary transition-mobile flex flex-col h-full cursor-pointer">
       <Link href={`/products/${product.id}`} className="block h-full" tabIndex={-1}>
         {!hideImage && (
           <div className="aspect-square overflow-hidden relative">
@@ -36,29 +36,29 @@ export function ProductCard({ product, hideImage }: ProductCardProps) {
               alt={product.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 768px) 100vw, 33vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           </div>
         )}
-        <div className="p-3 sm:p-4 flex flex-col flex-1">
-          <h3 className="font-medium text-primary-foreground mb-1 sm:mb-2 text-base sm:text-lg truncate overflow-hidden">
+        <div className="p-2.5 sm:p-3 md:p-4 flex flex-col flex-1">
+          <h3 className="font-medium text-primary-foreground mb-1 sm:mb-2 text-responsive-sm md:text-lg truncate overflow-hidden">
             {product.name}
           </h3>
-          <p className="text-secondary/70 text-sm mb-2 sm:mb-3 line-clamp-2">
+          <p className="text-secondary/70 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2 leading-relaxed">
             {product.description}
           </p>
         </div>
       </Link>
-      <div className="flex items-center justify-between mt-auto p-3 pt-0">
-        <span className="text-lg sm:text-xl font-bold text-secondary">
+      <div className="flex items-center justify-between mt-auto p-2.5 sm:p-3 pt-0">
+        <span className="text-responsive-base md:text-xl font-bold text-secondary">
           ${product.price.toFixed(2)}
         </span>
         <button
           type="button"
-          className="flex items-center gap-2 bg-pink-500 text-white hover:bg-pink-600 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base rounded transition-all"
+          className="flex items-center gap-1.5 sm:gap-2 bg-pink-500 text-white hover:bg-pink-600 px-2.5 sm:px-3 md:px-4 py-2 text-responsive-xs md:text-base rounded transition-all touch-manipulation mobile-button"
           onClick={() => router.push(`/products/${product.id}`)}
         >
-          <ShoppingCart className="h-4 w-4" />
+          <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <span className="hidden xs:inline">Customize & Order</span>
         </button>
       </div>
