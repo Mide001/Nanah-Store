@@ -24,3 +24,133 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Mobile-optimized touch targets */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Improved mobile scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Better mobile form inputs */
+  .mobile-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Mobile-optimized buttons */
+  .mobile-button {
+    min-height: 44px; /* Apple's recommended minimum touch target */
+    min-width: 44px;
+  }
+  
+  /* Responsive text utilities */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+  
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+  
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl;
+  }
+  
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl;
+  }
+  
+  /* Responsive spacing utilities */
+  .space-responsive {
+    @apply space-y-3 sm:space-y-4;
+  }
+  
+  .gap-responsive {
+    @apply gap-3 sm:gap-4;
+  }
+  
+  .p-responsive {
+    @apply p-3 sm:p-4;
+  }
+  
+  .px-responsive {
+    @apply px-3 sm:px-4;
+  }
+  
+  .py-responsive {
+    @apply py-3 sm:py-4;
+  }
+  
+  /* Mobile-first grid utilities */
+  .grid-mobile {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6;
+  }
+  
+  /* Mobile-optimized card */
+  .mobile-card {
+    @apply bg-white rounded-lg border border-gray-200 shadow-sm p-3 sm:p-4;
+  }
+  
+  /* Mobile-optimized modal */
+  .mobile-modal {
+    @apply w-[95vw] max-w-md max-h-[90vh] overflow-y-auto;
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar for mobile */
+  .scrollbar-mobile {
+    scrollbar-width: thin;
+    scrollbar-color: #e5e7eb transparent;
+  }
+  
+  .scrollbar-mobile::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .scrollbar-mobile::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-mobile::-webkit-scrollbar-thumb {
+    background-color: #e5e7eb;
+    border-radius: 2px;
+  }
+  
+  /* Prevent text selection on interactive elements */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Smooth transitions for mobile */
+  .transition-mobile {
+    @apply transition-all duration-200 ease-in-out;
+  }
+}
