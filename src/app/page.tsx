@@ -121,51 +121,53 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Small Header with Context */}
-      <div className="bg-gray-100 text-gray-700 py-2 px-4 text-center">
-        <span className="text-sm font-medium">
+      <div className="bg-gray-100 text-gray-700 py-2 px-3 sm:px-4 text-center">
+        <span className="text-xs sm:text-sm font-medium leading-tight">
           {storeSettings?.description || "Nanah Store: Unique, handcrafted crochet items"}
         </span>
       </div>
 
       {/* Main Header */}
-      <header className="border-b border-gray-200 p-4">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+      <header className="border-b border-gray-200 p-3 sm:p-4">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 sm:gap-0">
           <div className="flex items-center">
-            <h1 className="text-xl font-bold">
+            <h1 className="text-lg sm:text-xl font-bold">
               {storeSettings?.storeName || "Nanah Store"}
             </h1>
           </div>
           <button
-            className="relative flex items-center gap-2 text-pink-500 hover:text-pink-600 focus:outline-none"
+            className="relative flex items-center gap-1 sm:gap-2 text-pink-500 hover:text-pink-600 focus:outline-none p-2 rounded-lg hover:bg-pink-50 transition-colors"
             onClick={() => setShowPaymentModal(true)}
             aria-label="Checkout"
             disabled={cartItems.length === 0}
           >
-            <ShoppingCart className="h-7 w-7" />
+            <ShoppingCart className="h-6 w-6 sm:h-7 sm:w-7" />
             {cartItems.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-pink-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">{cartItems.length}</span>
+              <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-pink-500 text-white rounded-full text-xs w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center font-medium">
+                {cartItems.length}
+              </span>
             )}
           </button>
         </div>
       </header>
 
       {/* Search and Filter */}
-      <div className="max-w-6xl mx-auto p-4">
-        <div className="flex gap-2 mb-8">
+      <div className="max-w-6xl mx-auto p-responsive">
+        <div className="flex flex-col sm:flex-row gap-responsive mb-6 sm:mb-8">
           <div className="flex-1 relative min-w-0">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-10 pl-4 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-pink-400"
+              className="w-full h-11 sm:h-10 pl-4 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-pink-400 text-responsive-sm mobile-input"
             />
           </div>
-          <div className="flex items-center h-10">
+          <div className="flex items-center h-11 sm:h-10">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="h-10 w-28 px-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-pink-400"
+              className="h-11 sm:h-10 w-full sm:w-28 px-3 sm:px-2 text-responsive-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-pink-400 mobile-input"
             >
               {categories.map((category) => (
                 <option key={category} value={category}>
@@ -176,11 +178,13 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Simple Uniform Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {/* Product Grid - Optimized for mobile */}
+        <div className="grid-mobile">
           {filteredProducts.length === 0 && (
-            <div className="text-center text-gray-400 col-span-full py-12">
-              {products.length === 0 ? "No products available." : "No products found."}
+            <div className="text-center text-gray-400 col-span-full py-8 sm:py-12">
+              <p className="text-responsive-sm">
+                {products.length === 0 ? "No products available." : "No products found."}
+              </p>
             </div>
           )}
           {filteredProducts.map((product) => (
