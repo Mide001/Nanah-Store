@@ -11,6 +11,7 @@ A modern, responsive e-commerce platform for handcrafted crochet items. Built wi
 - 📱 **Responsive Design**: Optimized for desktop, tablet, and mobile
 - ⚡ **Fast Performance**: Built with Next.js 15 for optimal speed
 - 🎯 **Made-to-Order**: Specialized for custom crochet orders
+- 🔐 **Secure Admin Panel**: Protected admin dashboard for store management
 
 ## Tech Stack
 
@@ -19,7 +20,32 @@ A modern, responsive e-commerce platform for handcrafted crochet items. Built wi
 - **Styling**: Tailwind CSS
 - **State Management**: React Context API
 - **Icons**: Lucide React
+- **Database**: MongoDB with Prisma ORM
 - **Web3**: Wagmi (for future blockchain integration)
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+# Database
+DATABASE_URL="your-mongodb-atlas-connection-string"
+
+# Admin Authentication
+ADMIN_USERNAME="your-admin-username"
+ADMIN_PASSWORD="your-secure-admin-password"
+
+# Next.js
+NEXTAUTH_SECRET="your-nextauth-secret"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+### Admin Authentication Setup
+
+1. Set secure `ADMIN_USERNAME` and `ADMIN_PASSWORD` in your environment variables
+2. Access the admin panel at `/admin`
+3. Use your configured credentials to log in
+4. Never commit credentials to version control
 
 ## Getting Started
 
@@ -34,12 +60,20 @@ cd Nanah-Store
 npm install
 ```
 
-3. Run the development server:
+3. Set up environment variables (see above)
+
+4. Run database migrations:
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+5. Run the development server:
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Project Structure
 
@@ -49,6 +83,8 @@ src/
 │   ├── layout.tsx      # Root layout with providers
 │   ├── page.tsx        # Homepage with product grid
 │   ├── providers.tsx   # Cart context provider
+│   ├── admin/          # Admin dashboard
+│   ├── api/            # API routes
 │   └── products/       # Product detail pages
 ├── components/         # Reusable UI components
 ├── data/              # Product data and types
@@ -68,6 +104,13 @@ src/
 - Cart modal with item details
 - Search and category filtering
 - Responsive product grid
+
+### Admin Dashboard
+- Secure authentication system
+- Product management (add, edit, delete)
+- Order management and status updates
+- Store settings configuration
+- Mobile-optimized interface
 
 ## Contributing
 
