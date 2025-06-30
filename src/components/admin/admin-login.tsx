@@ -12,17 +12,34 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
-    // Simple admin authentication (in production, this would be server-side)
-    if (username === "admin" && password === "admin123") {
-      const token = btoa(`${username}:${Date.now()}`);
-      onLogin(token);
-    } else {
-      setError("Invalid username or password");
+    try {
+      const response = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        onLogin(data.token);
+      } else {
+        setError(data.error || 'Authentication failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,6 +76,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                   onChange={(e) => setUsername(e.target.value)}
                   className="appearance-none block w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-sm text-gray-900"
                   placeholder="Enter username"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -77,11 +95,13 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                   onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none block w-full px-3 py-2.5 sm:py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-sm text-gray-900"
                   placeholder="Enter password"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center touch-manipulation"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4 text-gray-400" />
@@ -101,9 +121,10 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2.5 sm:py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 touch-manipulation"
+                disabled={isLoading}
+                className="w-full flex justify-center py-2.5 sm:py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign in
+                {isLoading ? 'Signing in...' : 'Sign in'}
               </button>
             </div>
           </form>
@@ -114,12 +135,11 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Demo Credentials</span>
+                <span className="px-2 bg-white text-gray-500">Secure Access</span>
               </div>
             </div>
             <div className="mt-4 text-center text-xs text-gray-500">
-              <p>Username: <strong>admin</strong></p>
-              <p>Password: <strong>admin123</strong></p>
+              <p>Contact the store administrator for access credentials</p>
             </div>
           </div>
         </div>
